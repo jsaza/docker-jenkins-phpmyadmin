@@ -1,0 +1,36 @@
+version: '3.1'
+
+services:
+  jenkins:
+    image: jenkins/jenkins:lts
+    container_name: jenkins
+    ports:
+      - 8080:8080
+    volumes:
+      - ./jenkins_home/jobs:/var/jenkins_home/jobs
+      - ./jenkins_home/secrets:/var/jenkins_home/secrets
+      - ./jenkins_home/workspace:/var/jenkins_home/workspace
+  mysqldb:
+    image: mysql:5.7
+    container_name: jenkins-mysql
+    environment:
+      MYSQL_DATABASE: <database>
+      MYSQL_USER: <user>
+      MYSQL_PASSWORD: <password>
+      MYSQL_ROOT_PASSWORD: <password>
+      TZ: 'Asia/Tokyo'
+    ports:
+      - "3306:3306"
+    command: mysqld --character-set-server=utf8mb4 --collation-server=utf8mb4_unicode_ci
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: jenkins-phpmyadmin
+    depends_on:
+      - mysqldb
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysqldb
+    ports:
+      - "3000:80"
+    volumes:
+      - ./phpmyadmin/sessions:/sessions
